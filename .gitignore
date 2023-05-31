@@ -1,0 +1,5 @@
+assets/fonts/
+build/*
+!build/CMakeLists.txt
+output/paintdotnix
+.idea
