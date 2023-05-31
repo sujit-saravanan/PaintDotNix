@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(paintdotnix)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-lharfbuzz")
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_FLAGS "-lharfbuzz -std=c++23")
 set(CMAKE_EXPORT_COMPILE_COMMANDS )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../output)
 

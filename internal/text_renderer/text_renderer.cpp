@@ -1,6 +1,7 @@
 #include <utility>
 #include "text_renderer.h"
 
+
 PDN::UI::Text::Buffer::Buffer(const char *text, int32_t text_length, uint32_t item_offset, int32_t item_length) noexcept {
         m_buf = hb_buffer_create();
         hb_buffer_add_utf8(m_buf, text, text_length, item_offset, item_length);
@@ -54,7 +55,7 @@ PDN::UI::Text::Buffer &PDN::UI::Text::Buffer::operator+=(const char *rhs) {
 
 
 
-inline void PDN::UI::Text::Buffer::guessSegmentPropertiesIfEmpty() {
+inline void PDN::UI::Text::Buffer::guessSegmentPropertiesIfEmpty() noexcept {
         if (isEmpty()) [[unlikely]] {
                 hb_buffer_guess_segment_properties(m_buf);
         }
@@ -85,29 +86,21 @@ hb_buffer_t *PDN::UI::Text::Buffer::buffer() const noexcept {
         return m_buf;
 }
 
-std::vector<hb_glyph_info_t> PDN::UI::Text::Buffer::glyphInfos() const noexcept {
-        unsigned int glyph_count;
-        hb_glyph_info_t *glyph_info = hb_buffer_get_glyph_infos(m_buf, &glyph_count);
-        
-        return {glyph_info, glyph_info + glyph_count};
-        
-}
-
-std::vector<hb_glyph_position_t> PDN::UI::Text::Buffer::glyphPositions() const noexcept {
-        if (!hb_buffer_has_positions(m_buf))
-                return {};
-        unsigned int glyph_count;
-        hb_glyph_position_t *pos_info = hb_buffer_get_glyph_positions(m_buf, &glyph_count);
-        return {pos_info, pos_info + glyph_count};
+glyphs_view PDN::UI::Text::Buffer::glyphs() noexcept {
+        uint32_t glyph_count;
+        hb_glyph_info_t *glyph_infos = hb_buffer_get_glyph_infos(m_buf, &glyph_count);
+        hb_glyph_position_t *glyph_positions = hb_buffer_get_glyph_positions(m_buf, &glyph_count);
+        return std::views::zip(std::ranges::subrange(glyph_infos, glyph_infos + glyph_count), std::ranges::subrange(glyph_positions, glyph_positions + glyph_count));
 }
 
 
 
 
-PDN::UI::Text::Font::Font(const char *font_filepath, uint32_t blob_face_index) {
+PDN::UI::Text::Font::Font(const char *font_filepath, int font_size, uint32_t blob_face_index) {
         hb_blob_t *blob = hb_blob_create_from_file(font_filepath);
         hb_face_t *face = hb_face_create(blob, blob_face_index);
         m_font = hb_font_create(face);
+        hb_font_set_scale(m_font, font_size * 64, font_size * 64);
         
         hb_face_destroy(face);
         hb_blob_destroy(blob);

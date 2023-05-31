@@ -4,6 +4,9 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <ranges>
+
+typedef std::ranges::zip_view<std::ranges::subrange<hb_glyph_info_t*>, std::ranges::subrange<hb_glyph_position_t*>> glyphs_view;
 
 namespace PDN::UI::Text {
         class Buffer {
@@ -25,11 +28,10 @@ namespace PDN::UI::Text {
                 [[nodiscard]] bool isEmpty() const noexcept;
                 [[nodiscard]] hb_buffer_t *buffer() const noexcept;
                 
-                [[nodiscard]] std::vector<hb_glyph_info_t> glyphInfos() const noexcept;
-                [[nodiscard]] std::vector<hb_glyph_position_t> glyphPositions() const noexcept;
+                [[nodiscard]] glyphs_view glyphs() noexcept;
         
         private: // Private Member Functions
-                inline void guessSegmentPropertiesIfEmpty();
+                inline void guessSegmentPropertiesIfEmpty() noexcept;
         
         private: // Private Member Variables
                 hb_buffer_t *m_buf{nullptr};
@@ -42,7 +44,7 @@ namespace PDN::UI::Text {
         
         class Font {
         public: // Public Constructors/Destructors/Overloads (Rule of 5)
-                explicit Font(const char *font_filepath, uint32_t blob_face_index = 0);
+                explicit Font(const char *font_filepath, int font_size = 12, uint32_t blob_face_index = 0);
                 ~Font() noexcept; // 1. Destructor
                 Font(const Font &other) noexcept; // 2. Copy Constructor
                 Font(Font &&other) noexcept; // 3. Move Constructor
